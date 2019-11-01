@@ -37,6 +37,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
@@ -63,7 +64,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
     final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     static String id = "", con_id = "", cur_log="",cur_time="",traf="";
     static ArrayQueue queue = new ArrayQueue(5);
-    static int i=1;
+    static int num1=0;
 
     private final int MSG_1 = 1;
     private final int MSG_2 = 2;
@@ -279,21 +280,32 @@ protected void onResume() {
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     final DatabaseReference myRef = database.getReference("app").child(encodeUserEmail(usr)).child("gps");
+    myRef.child("history").removeValue();
     //final Date date = new Date();
     //final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
+
     final Timer m_Timer = new Timer();
     TimerTask m_Task = new TimerTask() {
-
+         Query last = myRef.child("history").orderByKey().limitToLast(1);
+        String num = last.getRef().getKey();
         @Override
         public void run() {
-                if(i<=5) {
-                    myRef.child("history").child(Integer.toString(i)).child("loc").setValue(cur_log);
-                    myRef.child("history").child(Integer.toString(i)).child("time").setValue(cur_time);
-                    i++;
+            Log.d(TAG, num);
+                if(num.equals("history")){ //zero nodes
+                    myRef.child("history").child("1").child("loc").setValue(cur_log);
+                    myRef.child("history").child("1").child("time").setValue(cur_time);
+                    num = "1";
+                    num1=Integer.parseInt(num)+1;
+                }else{
+                    myRef.child("history").child(Integer.toString(num1)).child("loc").setValue(cur_log);
+                    myRef.child("history").child(Integer.toString(num1)).child("time").setValue(cur_time);
+                    num1++;
                 }
-                else{
-                    m_Timer.cancel();
-                }
+
+            ///
+
+
         }
     };
         m_Timer.schedule(m_Task,15000,2000);
