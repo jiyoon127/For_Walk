@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "359723597553",
+    "firebase_url": "https://for-walk-gachon.firebaseio.com",
+    "project_id": "for-walk-gachon",
+    "storage_bucket": "for-walk-gachon.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:359723597553:android:172ddb2fb007a3d761f350",
+        "android_client_info": {
+          "package_name": "com.example.forwalk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDT-yAxklneIHcYqSclyzvGQp3axo_JP6s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
