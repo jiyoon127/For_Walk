@@ -136,7 +136,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
             }
         });
 //----------------bluetooth--------------------
-
+/*
         if(!bt.isBluetoothAvailable())
         {
             Toast.makeText(this,"블루투스를 사용할 수 없습니다. 어플을 종료합니다.",Toast.LENGTH_LONG).show();
@@ -267,7 +267,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
                 Toast.makeText(getApplicationContext(),"Bluetooth was not enabled",Toast.LENGTH_SHORT).show();
                 finish();
             }
-        }
+        }*/
 //-----------------------------------------------------
     }
 
