@@ -1,5 +1,6 @@
 package com.example.forwalk;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,8 +19,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,6 +39,7 @@ import java.util.List;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private UiSettings mUiSettings;
     private RecyclerView rView1;
     private GpsAdapter mGpsAdapter;
     private List<GpsItem> mGpsArray;
@@ -108,17 +114,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mUiSettings = mMap.getUiSettings();
+        mUiSettings.setZoomControlsEnabled(true);
+        mUiSettings.setZoomGesturesEnabled(true);
     }
 
     public void getLocations(){
         mMap.clear();
+        LatLng[] current = new LatLng[5];
         for(int i=0;i<5;i++) {
             loc = locs[i].split(",");
-            LatLng current = new LatLng(Float.parseFloat(loc[0]), Float.parseFloat(loc[1]));
-            mMap.addMarker(new MarkerOptions().position(current));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(current));
+            current[i] = new LatLng(Float.parseFloat(loc[0]), Float.parseFloat(loc[1]));
+            mMap.addMarker(new MarkerOptions().position(current[i]).title((i+1)+" 번"+times[i])).showInfoWindow();
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(current[i]));
         }
-        mMap.setMinZoomPreference(10);
+        Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
+                .clickable(true)
+                .add(
+                        current[0],
+                        current[1],
+                        current[2],
+                        current[3],
+                        current[4]));
+        polyline1.setColor(Color.parseColor("#FF0000"));
+        mMap.setMinZoomPreference(5);
     }
 //---------------------handler-------------------------
 
