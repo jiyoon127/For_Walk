@@ -380,7 +380,7 @@ protected void onResume() {
         double lng = location.getLongitude();
         long time = location.getTime();
         final Date date = new Date();
-        final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        final SimpleDateFormat formatter = new SimpleDateFormat("yyyy년 MM월 dd일 HH:mm:ss");
         String usr = mAuth.getCurrentUser().getEmail();
 
         Log.d(LOC_INFO, "latitiude:" + lat + ", longnitude: " + lng);
