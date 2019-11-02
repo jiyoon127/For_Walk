@@ -36,7 +36,7 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference ref = database.getReference("app");
 
-    static String loc;
+    static String loc, con;
     static String[] locs;
     TextView tView5;
     Button btn_map;
@@ -61,6 +61,7 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
                 String value = dataSnapshot.getValue(String.class);
                 usr_id=value;
                 Log.d(TAG,"user id value"+value);
+                con = value;
                 handler.sendEmptyMessage(1);
 
             }
@@ -85,10 +86,16 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
         btn_map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedReference.clearUserName(ProtectorActivity.this);
-                Intent intent = new Intent(getBaseContext(), MapsActivity.class);
-                startActivity(intent);
-                //no need to close
+                if(!usr_id.isEmpty()) {
+                    Intent intent = new Intent(ProtectorActivity.this, MapsActivity.class);
+                    intent.putExtra("connected_id", usr_id);
+                    startActivity(intent);
+                    Log.d("con val success = ",usr_id);
+                    //no need to close
+                }
+                else{
+                    Log.d("con val fail = ",usr_id);
+                }
             }
         });
 
@@ -97,6 +104,7 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
     public void getLocation3(){
         LatLng current = new LatLng(Float.parseFloat(locs[0]),Float.parseFloat(locs[1]));
         mMap.addMarker(new MarkerOptions().position(current));
+        mMap.setMinZoomPreference(10);
 
     }
 

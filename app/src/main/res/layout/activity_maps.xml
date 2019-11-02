@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".MapsActivity">
 
 
     <androidx.recyclerview.widget.RecyclerView
@@ -17,13 +18,13 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/map"
+        app:layout_constraintBottom_toTopOf="@+id/maps"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <fragment
-        android:id="@+id/map"
+        android:id="@+id/maps"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -38,6 +39,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rView1"
-        tools:context=".MapsSimple" />
+        tools:context=".MapsActivity" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
