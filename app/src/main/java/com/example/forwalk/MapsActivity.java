@@ -145,7 +145,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if(!locs[i].equals("null")){
                 loc = locs[i].split(",");
                 current[i] = new LatLng(Float.parseFloat(loc[0]), Float.parseFloat(loc[1]));
-                markers[i] = mMap.addMarker(new MarkerOptions().position(current[i]).title((i+1)+" 번"+times[i]));
+                markers[i] = mMap.addMarker(new MarkerOptions().position(current[i]).title((i+1)+" 번 "+times[i]));
                 markers[i].showInfoWindow();
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(current[i]));
                 mMap.setMinZoomPreference(5);

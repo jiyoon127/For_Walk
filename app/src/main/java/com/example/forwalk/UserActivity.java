@@ -379,7 +379,6 @@ protected void onResume() {
     @Override
     protected void onPause() {
         super.onPause();
-
         lm.removeUpdates(this);
     }
 
@@ -389,7 +388,6 @@ protected void onResume() {
     public void onLocationChanged(Location location) {
         double lat = location.getLatitude();
         double lng = location.getLongitude();
-        long time = location.getTime();
         final Date date = new Date();
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyy년 MM월 dd일 HH:mm:ss");
         String usr = mAuth.getCurrentUser().getEmail();
@@ -504,7 +502,14 @@ protected void onResume() {
     @Override public void onBackPressed() {
         //super.onBackPressed();
         back.onBackPressed();
-        mAuth.signOut();
+        lm.removeUpdates(this);
+        lm=null;
+        LocationListener lmListen =null;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     static String encodeUserEmail(String userEmail) {
