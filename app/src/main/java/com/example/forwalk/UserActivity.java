@@ -66,9 +66,9 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
     static ArrayQueue queue = new ArrayQueue(5);
     static int num1=0;
 
+    private BackPressCloseHandler back;
     private final int MSG_1 = 1;
     private final int MSG_2 = 2;
-
     LocationManager lm;
 
     @Override
@@ -83,6 +83,8 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         bt = new BluetoothSPP(this);//initializing
+
+        back = new BackPressCloseHandler(this);
 
         tView10 = (TextView) findViewById(R.id.tView10);
         tView11 = (TextView) findViewById(R.id.tView11);
@@ -180,8 +182,13 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                  long value = dataSnapshot.getValue(long.class);
-                                         traf = Long.toString(value);
-                                         bt.send(traf,true);
+                                 while(true){
+                                    if(value!=null){
+                                        traf = Long.toString(value);
+                                        bt.send(traf,true);
+                                        break;
+                                    }
+                                 }
                         }
 
                         @Override
@@ -281,6 +288,10 @@ protected void onResume() {
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     final DatabaseReference myRef = database.getReference("app").child(encodeUserEmail(usr)).child("gps");
     myRef.child("history").removeValue();
+    for(int i=1;i<=5;i++) {
+        myRef.child("history").child(Integer.toString(i)).child("loc").setValue("null");
+        myRef.child("history").child(Integer.toString(i)).child("time").setValue("null");
+    }
     //final Date date = new Date();
     //final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
@@ -488,6 +499,12 @@ protected void onResume() {
                 Log.d(TAG,"fail to read protector's phone number");
             }
         });
+    }
+
+    @Override public void onBackPressed() {
+        //super.onBackPressed();
+        back.onBackPressed();
+        mAuth.signOut();
     }
 
     static String encodeUserEmail(String userEmail) {

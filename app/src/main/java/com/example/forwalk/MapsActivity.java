@@ -5,11 +5,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,7 +22,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -53,6 +54,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     static String[] loc;
     static String[] locs = new String[5];
     static String[] times = new String[5];
+    static LatLng[] current = new LatLng[5];
+    static Marker[] markers = new Marker[5];
     static String con_id="";
 
     @Override
@@ -68,13 +71,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Query last5 = ref.child(con_id).child("gps").child("history").limitToLast(5);
         last5.addValueEventListener(new ValueEventListener() {
-            int i=0;
+
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                int i=0;
                 for(DataSnapshot postSnapshot: dataSnapshot.getChildren()){
-                    locs[i]= postSnapshot.child("loc").getValue().toString();
-                    Log.d("loc","loc "+i+" = "+locs[i]);
+                    locs[i] = postSnapshot.child("loc").getValue().toString();
+                    Log.d("loc", "loc " + i + " = " + locs[i]);
                     times[i] = postSnapshot.child("time").getValue().toString();
+                    if(times[i].equals("null"))
+                        times[i]="위치정보가 존재하지 않습니다";
                     i++;
                 }
                 handler.sendEmptyMessage(1);
@@ -109,6 +115,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         rView1.setAdapter(mGpsAdapter);
         rView1.setItemAnimator(new DefaultItemAnimator());
+        mGpsAdapter.setOnItemClickListener(new GpsAdapter.OnItemClickListener(){
+            @Override
+            public void onItemClick(GpsAdapter.ViewHolder holder, View view, int position) {
+                GpsItem item = GpsAdapter.getItem(position);
+                CardView cv = (CardView) findViewById(R.id.cardView);
+                cv.setCardBackgroundColor(Color.WHITE);
+                Toast.makeText(getApplicationContext(),String.valueOf(position+1),Toast.LENGTH_LONG).show();
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(current[position]));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+                markers[position].showInfoWindow();
+            }
+        });
     }
 
     @Override
@@ -119,23 +137,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mUiSettings.setZoomGesturesEnabled(true);
     }
 
+
     public void getLocations(){
         mMap.clear();
-        LatLng[] current = new LatLng[5];
+
         for(int i=0;i<5;i++) {
-            loc = locs[i].split(",");
-            current[i] = new LatLng(Float.parseFloat(loc[0]), Float.parseFloat(loc[1]));
-            mMap.addMarker(new MarkerOptions().position(current[i]).title((i+1)+" 번"+times[i])).showInfoWindow();
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(current[i]));
+            if(!locs[i].equals("null")){
+                loc = locs[i].split(",");
+                current[i] = new LatLng(Float.parseFloat(loc[0]), Float.parseFloat(loc[1]));
+                markers[i] = mMap.addMarker(new MarkerOptions().position(current[i]).title((i+1)+" 번"+times[i]));
+                markers[i].showInfoWindow();
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(current[i]));
+                mMap.setMinZoomPreference(5);
+            }else{
+                current[i]=null;
+            }
         }
         Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
-                .clickable(true)
-                .add(
-                        current[0],
-                        current[1],
-                        current[2],
-                        current[3],
-                        current[4]));
+                .clickable(true));
+        for(int i=0;i<5;i++){
+            if(current[i]!=null){
+                polyline1 = mMap.addPolyline(new PolylineOptions().clickable(true).add(current[i]));
+            }
+        }
         polyline1.setColor(Color.parseColor("#FF0000"));
         mMap.setMinZoomPreference(5);
     }
