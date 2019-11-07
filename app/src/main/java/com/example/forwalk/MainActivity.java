@@ -24,6 +24,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -63,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pw = eText2.getText().toString();
         id= encodeUserEmail(email);
 
-        DatabaseReference usrRef = database.getReference("app").child(id);
+        final DatabaseReference usrRef = database.getReference("app").child(id);
 
         switch(v.getId()){
             case R.id.btn_login :
@@ -76,12 +77,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             startLoading(UserActivity.class);
                             SharedReference.setUserName(MainActivity.this,email,pw,0);
                         }
-                        else if(value.equals("protector")){
+                        else{
                             startLoading(ProtectorActivity.class);
                             SharedReference.setUserName(MainActivity.this,email,pw,1);
                         }
-                        else
-                            type=-1;
                     }
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -95,7 +94,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                //welcome!
+                                    String deviceToken = FirebaseInstanceId.getInstance().getToken();
+                                    usrRef.child("device_token").setValue(deviceToken);
                             } else {//failed to log in
                                 Toast.makeText(getApplicationContext(), "로그인에 실패하였습니다. 다시 시도해주세요.", Toast.LENGTH_LONG).show();
                             }

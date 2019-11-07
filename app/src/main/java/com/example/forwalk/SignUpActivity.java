@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.Iterator;
 
@@ -124,6 +125,7 @@ public class SignUpActivity extends AppCompatActivity implements
 
     private void createAccount(final String email, String password) {
         Log.d(TAG, "createAccount:" + email);
+        final DatabaseReference ref = database.getReference("app");
 
         mAuth.createUserWithEmailAndPassword(email, password)//이메일 형식으로 계정을 생성
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -132,7 +134,8 @@ public class SignUpActivity extends AppCompatActivity implements
                         if (task.isSuccessful()) {//계정 생성 성공시
                             Log.d(TAG, "createUserWithEmail:success");
                             //FirebaseUser user = mAuth.getCurrentUser();
-
+                            final String deviceToken = FirebaseInstanceId.getInstance().getToken();
+                            ref.child(encodeUserEmail(id)).child("device_token").setValue(deviceToken);
 
                             Toast.makeText(SignUpActivity.this, R.string.sign_up_success,
                                     Toast.LENGTH_SHORT).show();
@@ -162,7 +165,7 @@ public class SignUpActivity extends AppCompatActivity implements
                                                     DatabaseReference proRef = database.getReference("app").child(encodeUserEmail(eText5.getText().toString()));
                                                     proRef.child("con_id").setValue(encodeUserEmail(id));
                                                     Toast.makeText(getApplicationContext(),"사용자 아이디가 존재합니다",Toast.LENGTH_LONG).show();
-
+                                                    proRef.child("receiver_token").setValue(deviceToken);
                                                     return;
                                                 }
                                             }

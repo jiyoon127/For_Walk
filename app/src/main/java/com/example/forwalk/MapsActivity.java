@@ -71,17 +71,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Query last5 = ref.child(con_id).child("gps").child("history").limitToLast(5);
         last5.addValueEventListener(new ValueEventListener() {
-
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int i=0;
                 for(DataSnapshot postSnapshot: dataSnapshot.getChildren()){
                     locs[i] = postSnapshot.child("loc").getValue().toString();
                     Log.d("loc", "loc " + i + " = " + locs[i]);
-                    times[i] = postSnapshot.child("time").getValue().toString();
-                    if(times[i].equals("null"))
-                        times[i]="위치정보가 존재하지 않습니다";
-                    i++;
+                        times[i] = postSnapshot.child("time").getValue().toString();
+                        if (times[i].equals("null"))
+                            times[i] = "위치정보가 존재하지 않습니다";
+                        i++;
                 }
                 handler.sendEmptyMessage(1);
             }
@@ -123,7 +122,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 cv.setCardBackgroundColor(Color.WHITE);
                 Toast.makeText(getApplicationContext(),String.valueOf(position+1),Toast.LENGTH_LONG).show();
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(current[position]));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
                 markers[position].showInfoWindow();
             }
         });
@@ -141,6 +140,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void getLocations(){
         mMap.clear();
 
+        Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
+                .clickable(true));
+
         for(int i=0;i<5;i++) {
             if(!locs[i].equals("null")){
                 loc = locs[i].split(",");
@@ -148,20 +150,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 markers[i] = mMap.addMarker(new MarkerOptions().position(current[i]).title((i+1)+" 번 "+times[i]));
                 markers[i].showInfoWindow();
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(current[i]));
-                mMap.setMinZoomPreference(5);
+                mMap.setMinZoomPreference(7);
             }else{
                 current[i]=null;
             }
+            polyline1 = mMap.addPolyline(new PolylineOptions().add(current[i]));
         }
-        Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
+        /*Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
                 .clickable(true));
         for(int i=0;i<5;i++){
             if(current[i]!=null){
                 polyline1 = mMap.addPolyline(new PolylineOptions().clickable(true).add(current[i]));
             }
-        }
+        }*/
         polyline1.setColor(Color.parseColor("#FF0000"));
-        mMap.setMinZoomPreference(5);
     }
 //---------------------handler-------------------------
 

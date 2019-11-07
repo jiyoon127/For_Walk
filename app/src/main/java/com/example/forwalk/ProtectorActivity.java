@@ -2,9 +2,14 @@ package com.example.forwalk;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,7 +24,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -36,7 +40,7 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference ref = database.getReference("app");
 
-    static String loc, con;
+    static String loc, con, emer;
     static String[] locs;
     TextView tView5;
     Button btn_map;
@@ -71,8 +75,6 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
 
             }
         });
-
-
 
         Toast.makeText(this,usr_id,Toast.LENGTH_LONG).show();
 
