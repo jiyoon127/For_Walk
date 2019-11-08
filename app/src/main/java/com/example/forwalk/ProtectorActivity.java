@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentActivity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.location.LocationListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +37,7 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
 
     private GoogleMap mMap;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private BackPressCloseHandler back;
     String usr = encodeUserEmail(mAuth.getCurrentUser().getEmail());
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference ref = database.getReference("app");
@@ -43,7 +45,7 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
     static String loc, con, emer;
     static String[] locs;
     TextView tView5;
-    Button btn_map;
+    Button btn_map, btn_usr_del_login2;
     final String TAG = "VALUE";
     static String usr_id="u";
     private final int MSG_1 = 1;
@@ -81,9 +83,8 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
 
         tView5 = (TextView) findViewById(R.id.tView5);
         btn_map = (Button) findViewById(R.id.btn_map);
-
-
-
+        btn_usr_del_login2 = (Button) findViewById(R.id.btn_usr_del_login2);
+        back = new BackPressCloseHandler(this);
 
         btn_map.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,6 +99,13 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
                 else{
                     Log.d("con val fail = ",usr_id);
                 }
+            }
+        });
+
+        btn_usr_del_login2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedReference.clearUserName(ProtectorActivity.this);
             }
         });
 
@@ -200,6 +208,12 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
 
 
         Toast.makeText(getApplicationContext(),"2"+loc,Toast.LENGTH_LONG).show();
+    }
+
+    @Override public void onBackPressed() {
+        //super.onBackPressed();
+        back.onBackPressed();
+        mAuth.signOut();
     }
 
     static String encodeUserEmail(String userEmail) {

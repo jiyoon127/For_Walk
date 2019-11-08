@@ -36,8 +36,8 @@ public class SignUpActivity extends AppCompatActivity implements
 
     String id, pw, connect;
 
-    EditText eText3, eText4, eText5, eText6, eText7;
-    TextView tView5, tView6,tView7, tView8, tView9;
+    EditText eText3, eText4, eText5, eText6, eText7, eRelText;
+    TextView tView5, tView6,tView7, tView8, tView9, tRelView;
     Button btn_sign_up;
     RadioGroup rGroup2;
     RadioButton rBtn3, rBtn4;
@@ -57,6 +57,7 @@ public class SignUpActivity extends AppCompatActivity implements
         eText5 = (EditText) findViewById(R.id.eText5);
         eText6 = (EditText) findViewById(R.id.eText6);
         eText7 = (EditText) findViewById(R.id.eText7);
+        eRelText = (EditText) findViewById(R.id.eRelText);
         btn_sign_up = (Button) findViewById(R.id.btn_sign_up);
         rGroup2 = (RadioGroup) findViewById(R.id.rGroup2);
         rBtn3 = (RadioButton) findViewById(R.id.rBtn3);
@@ -66,6 +67,7 @@ public class SignUpActivity extends AppCompatActivity implements
         tView7 = (TextView) findViewById(R.id.tView7);
         tView8 = (TextView) findViewById(R.id.tView8);
         tView9 = (TextView) findViewById(R.id.tView9);
+        tRelView = (TextView) findViewById(R.id.tRelView);
 
 
         mAuth = FirebaseAuth.getInstance();
@@ -77,7 +79,9 @@ public class SignUpActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 tView9.setVisibility(View.GONE);
+                tRelView.setVisibility(View.GONE);
                 eText5.setVisibility(View.GONE);
+                eRelText.setVisibility(View.GONE);
             }
         });
 
@@ -85,7 +89,9 @@ public class SignUpActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 tView9.setVisibility(View.VISIBLE);
+                tRelView.setVisibility(View.VISIBLE);
                 eText5.setVisibility(View.VISIBLE);
+                eRelText.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -101,6 +107,7 @@ public class SignUpActivity extends AppCompatActivity implements
 
             myRef.child("blu_id").setValue("null");
             myRef.child("con_id").setValue("null");
+            myRef.child("relationship").setValue(eRelText.getText().toString());
             myRef.child("emer").setValue(0);
             myRef.child("gps").child("current").setValue("null");
             for(int i=1;i<=5;i++) {

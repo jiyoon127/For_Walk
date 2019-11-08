@@ -151,6 +151,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 markers[i].showInfoWindow();
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(current[i]));
                 mMap.setMinZoomPreference(7);
+
             }else{
                 current[i]=null;
             }

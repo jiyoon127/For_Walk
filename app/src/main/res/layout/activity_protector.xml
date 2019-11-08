@@ -48,4 +48,13 @@
         app:layout_constraintTop_toBottomOf="@+id/tView5"
         tools:context=".ProtectorActivity" />
 
+    <Button
+        android:id="@+id/btn_usr_del_login2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="@string/del_auto_login"
+        app:layout_constraintBaseline_toBaselineOf="@+id/btn_map"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

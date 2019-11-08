@@ -6,6 +6,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import java.math.*;
 
 import android.Manifest;
 import android.app.Activity;
@@ -56,7 +57,7 @@ import app.akexorcist.bluetotohspp.library.DeviceList;
 
 public class UserActivity extends AppCompatActivity implements LocationListener {
 
-    Button btn_register, btn_connect;
+    Button btn_register, btn_connect, btn_usr_del_login1;
     TextView tView10, tView11, tView12, tView14, tView15, tView16;
 
     private FirebaseAuth mAuth;
@@ -103,6 +104,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
         tView16 = (TextView) findViewById(R.id.tView16);
         btn_register = (Button) findViewById(R.id.btn_register);
         btn_connect = (Button) findViewById(R.id.btn_con);
+        btn_usr_del_login1 = (Button) findViewById(R.id.btn_usr_del_login1);
         String usr = mAuth.getCurrentUser().getEmail();
 
 
@@ -131,6 +133,13 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
             myRef.child("history").child(Integer.toString(i)).child("time").setValue("null");
         }
 
+        btn_usr_del_login1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+             SharedReference.clearUserName(UserActivity.this);
+            }
+        });
+
         final Timer m_Timer = new Timer();
         TimerTask m_Task = new TimerTask() {
             Query last = myRef.child("history").orderByKey().limitToLast(1);
@@ -138,15 +147,17 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
             @Override
             public void run() {
                 Log.d(TAG, num);
-                if(num.equals("history")){ //zero nodes
-                    myRef.child("history").child("1").child("loc").setValue(cur_log);
-                    myRef.child("history").child("1").child("time").setValue(cur_time);
-                    num = "1";
-                    num1=Integer.parseInt(num)+1;
-                }else{
-                    myRef.child("history").child(Integer.toString(num1)).child("loc").setValue(cur_log);
-                    myRef.child("history").child(Integer.toString(num1)).child("time").setValue(cur_time);
-                    num1++;
+                if(cur_log.equals("") && cur_time.equals("")) {
+                    if (num.equals("history")) { //zero nodes
+                        myRef.child("history").child("1").child("loc").setValue(cur_log);
+                        myRef.child("history").child("1").child("time").setValue(cur_time);
+                        num = "1";
+                        num1 = Integer.parseInt(num) + 1;
+                    } else {
+                        myRef.child("history").child(Integer.toString(num1)).child("loc").setValue(cur_log);
+                        myRef.child("history").child(Integer.toString(num1)).child("time").setValue(cur_time);
+                        num1++;
+                    }
                 }
 
                 ///
@@ -158,7 +169,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
 
 
         ref.child("emer").setValue("0");
-        ref.child("name").addListenerForSingleValueEvent(new ValueEventListener() {//read user's name
+        ref.child("name").addValueEventListener(new ValueEventListener() {//read user's name
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String value = dataSnapshot.getValue(String.class);
@@ -201,7 +212,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
         tView11.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+//----------------------------------move to emergency situation func---------------------------------
                 Toast.makeText(getApplicationContext(), "hello", Toast.LENGTH_LONG).show();
                 HashMap<String, String> chatNotificationMap = new HashMap<>();
                 chatNotificationMap.put("from", FirebaseInstanceId.getInstance().getToken());
@@ -495,14 +506,22 @@ protected void onResume() {
 
         DatabaseReference ref = database.getReference("app").child(id);
 
-        ref.child("con_id").addListenerForSingleValueEvent(new ValueEventListener() {
+        ref.child("con_id").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String value = dataSnapshot.getValue(String.class);
                 if(value!=null) {
-                    con_id = value;
-                    Toast.makeText(getApplicationContext(), value, Toast.LENGTH_SHORT).show();
-                    handler.sendEmptyMessage(2);
+                    if(value.equals("null")){
+                        tView14.setVisibility(View.INVISIBLE);
+                        tView15.setVisibility(View.INVISIBLE);
+                        tView16.setText(R.string.pro_info);
+                    }else {
+                        tView14.setVisibility(View.VISIBLE);
+                        tView15.setVisibility(View.VISIBLE);
+                        con_id = value;
+                        Toast.makeText(getApplicationContext(), value, Toast.LENGTH_SHORT).show();
+                        handler.sendEmptyMessage(2);
+                    }
                 }
             }
 
@@ -517,7 +536,7 @@ protected void onResume() {
 
         DatabaseReference ref = database.getReference("app").child(con_id);
 
-        ref.child("name").addListenerForSingleValueEvent(new ValueEventListener() {//read protector's name
+        ref.child("name").addValueEventListener(new ValueEventListener() {//read protector's name
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String value = dataSnapshot.getValue(String.class);
@@ -542,6 +561,19 @@ protected void onResume() {
                 Log.d(TAG,"fail to read protector's phone number");
             }
         });
+
+        ref.child("relationship").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String value = dataSnapshot.getValue(String.class);
+                tView15.setText("관계: "+value);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override public void onBackPressed() {
@@ -551,6 +583,7 @@ protected void onResume() {
         lm.removeUpdates(this);
         lm=null;
         LocationListener lmListen =null;
+        mAuth.signOut();
     }
 
     @Override

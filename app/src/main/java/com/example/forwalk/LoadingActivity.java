@@ -31,7 +31,7 @@ public class LoadingActivity extends Activity {
         email = SharedReference.getUserName(LoadingActivity.this);
         pw = SharedReference.getUserPw(LoadingActivity.this);
         type = SharedReference.getUserType(LoadingActivity.this);
-        SharedReference.clearUserName(LoadingActivity.this);
+        //SharedReference.clearUserName(LoadingActivity.this);
 
         if (SharedReference.getUserName(LoadingActivity.this).length() == 0) {
             startLoading(MainActivity.class);

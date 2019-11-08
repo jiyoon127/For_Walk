@@ -24,4 +24,7 @@
     <string name="name">이름</string>
     <string name="connect">연동할 계정</string>
     <string name="phone">핸드폰 번호</string>
+    <string name="pro_info">보호자 정보가 없습니다</string>
+    <string name="rel">관</string>
+    <string name="del_auto_login">자동로그인 해제</string>
 </resources>
