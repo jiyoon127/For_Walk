@@ -2,7 +2,6 @@ package com.example.forwalk;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -71,12 +70,15 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
     final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     static String id = "", con_id = "", cur_log="",cur_time="",traf="", receiverUserID="";
     static ArrayQueue queue = new ArrayQueue(5);
-    static int num1=0;
+    static int num1=0, trf_size=0, min_j=0;
 
     private BackPressCloseHandler back;
     private final int MSG_1 = 1;
     private final int MSG_2 = 2;
     LocationManager lm;
+    static Traffic[] trf = new Traffic[100];
+    static double cur_lat, cur_lng;
+    static double[] d = new double[100];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +111,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
 
 
         final DatabaseReference ref = database.getReference("app").child(encodeUserEmail(id));
-        final DatabaseReference traffic = database.getReference("traffic").child("tra_id1").child("light");
+        final DatabaseReference trafficRef = database.getReference("traffic");
         final DatabaseReference myRef = database.getReference("app").child(encodeUserEmail(usr)).child("gps");
         final DatabaseReference NotificationRef = database.getReference("app").child("Notifications");
 
@@ -224,6 +226,57 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
                         break;
                     }
                 }
+
+                /*trafficRef.addValueEventListener(new ValueEventListener() {
+                    int i=0;
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for(DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                            trf[i] = new Traffic();
+                            trf[i] = postSnapshot.getValue(Traffic.class);
+                            i++;
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });*/
+
+                trafficRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        trf_size=0;
+                        for(DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                            long light = postSnapshot.child("light").getValue(long.class);
+                            String loc = postSnapshot.child("loc").getValue(String.class);
+                            Log.d(TAG, trf_size+"번 light: "+light+", loc: "+loc);
+                            trf[trf_size] = new Traffic(light, loc);
+                            trf_size++;
+                        }
+                        for(int j=0;j<trf_size;j++){
+                            d[j] = Math.sqrt(Math.pow(cur_lat - trf[j].get_lat(),2) + Math.pow(cur_lng - trf[j].get_lng(),2));
+                            Log.d(TAG, j+"번 d = "+d[j]);
+                        }
+
+                        double min = d[0];
+                        for(int j=1;j<trf_size;j++){
+                            if(d[j] < min) {
+                                min = d[j];
+                                min_j = j;
+                            }else
+                                min_j=0;
+                        }
+
+                        Toast.makeText(getApplicationContext(),"cur_trf: "+ trf[min_j].get_light(),Toast.LENGTH_LONG).show();
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+                //bt.send(trf[j]);
             }
         });
 
@@ -269,7 +322,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
                     ref.child("emer").setValue("1");
                 }
                 else if(message.equals("123")){
-                    traffic.addValueEventListener(new ValueEventListener() {
+                    trafficRef.child("tra_id1").chid("light").addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                  long value = dataSnapshot.getValue(long.class);
@@ -281,6 +334,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
                                     }
                                  }
                         }
+
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -385,24 +439,20 @@ protected void onResume() {
                     Manifest.permission.ACCESS_FINE_LOCATION)) {
 
                 //허가 필요성 설명
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
 
             } else {
 
-                //설명 필요없는 경우 권한 허가 요청
-
+                //permission required, if explanation is not needed
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
             }
 
         } else {
-            // ACCESS_FINE_LOCATION 권한이 있는 것이므로
-            // location updates 요청을 할 수 있다.
+            // Has ACCESS_FINE_LOCATION permission
+            // can request location updates
 
-            // GPS provider를 이용
+            // use GPS provider
             lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         }
     }
@@ -412,11 +462,11 @@ protected void onResume() {
             case MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
 
                 if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {// ACCESS_FINE_LOCATION 권한을 얻었으므로 관련 작업을 수행할 수 있다
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {//already have permission ACCESS_FINE_LOCATION
 
                     try {
                         String usr = mAuth.getCurrentUser().getEmail();
-                        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);//10분 간격으로 위치 전송
+                        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
                         FirebaseDatabase database = FirebaseDatabase.getInstance();
                         final DatabaseReference myRef = database.getReference("app").child(encodeUserEmail(usr)).child("gps");
                     } catch (SecurityException e) {
@@ -424,7 +474,7 @@ protected void onResume() {
                     }
 
                 } else {
-                    // 권한을 얻지 못 하였으므로 location 요청 작업을 수행할 수 없다
+                    //can't get permission and require user's location
                 }
                 return;
             }
@@ -453,6 +503,8 @@ protected void onResume() {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference myRef = database.getReference("app").child(encodeUserEmail(usr)).child("gps");
         cur_log = lat+","+lng;
+        cur_lat = Math.floor(lat*1000000)/1000000.0;
+        cur_lng = Math.floor(lng*1000000)/1000000.0;
         myRef.child("current").setValue(cur_log);
         cur_time = formatter.format(date);
 
