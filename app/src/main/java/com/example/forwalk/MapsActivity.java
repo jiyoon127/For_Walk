@@ -56,6 +56,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     static String[] times = new String[5];
     static LatLng[] current = new LatLng[5];
     static Marker[] markers = new Marker[5];
+    static ArrayList<LatLng> arrayPoints = new ArrayList<LatLng>();
     static String con_id="";
 
     @Override
@@ -139,32 +140,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void getLocations(){
         mMap.clear();
-
-        Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
-                .clickable(true));
+        PolylineOptions polyline1 = new PolylineOptions();
+        polyline1.color(Color.RED);
 
         for(int i=0;i<5;i++) {
             if(!locs[i].equals("null")){
                 loc = locs[i].split(",");
-                current[i] = new LatLng(Float.parseFloat(loc[0]), Float.parseFloat(loc[1]));
+                current[i] = new LatLng(Double.parseDouble(loc[0]), Double.parseDouble(loc[1]));
                 markers[i] = mMap.addMarker(new MarkerOptions().position(current[i]).title((i+1)+" 번 "+times[i]));
                 markers[i].showInfoWindow();
+                Log.d("current", "current["+i+"]: "+current[i]);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(current[i]));
                 mMap.setMinZoomPreference(7);
-
+                if(!current[i].equals("null"))
+                {
+                    arrayPoints.add(current[i]);
+                }
             }else{
                 current[i]=null;
             }
-            polyline1 = mMap.addPolyline(new PolylineOptions().add(current[i]));
         }
-        /*Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
-                .clickable(true));
-        for(int i=0;i<5;i++){
-            if(current[i]!=null){
-                polyline1 = mMap.addPolyline(new PolylineOptions().clickable(true).add(current[i]));
-            }
-        }*/
-        polyline1.setColor(Color.parseColor("#FF0000"));
+        polyline1.addAll(arrayPoints);
+        mMap.addPolyline(polyline1);
     }
 //---------------------handler-------------------------
 
