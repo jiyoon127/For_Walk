@@ -72,7 +72,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         String value = dataSnapshot.getValue(String.class);
-                        Toast.makeText(getApplicationContext(),"",Toast.LENGTH_LONG).show();//test
                         if(value.equals("user")) {
                             startLoading(UserActivity.class);
                             SharedReference.setUserName(MainActivity.this,email,pw,0);
@@ -84,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
-                        Toast.makeText(getApplicationContext(),"cannot read type val",Toast.LENGTH_LONG).show();
+                        //Toast.makeText(getApplicationContext(),"cannot read type val",Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -116,10 +115,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             switch(msg.what){
                 case MSG_1:
                     //func
-                    Toast.makeText(getApplicationContext(),"1",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"1",Toast.LENGTH_SHORT).show();
                     break;
                 case MSG_2:
-                    Toast.makeText(getApplicationContext(),"2",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"2",Toast.LENGTH_SHORT).show();
                     break;
             }
         }

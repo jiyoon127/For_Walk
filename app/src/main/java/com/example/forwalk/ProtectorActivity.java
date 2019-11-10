@@ -24,6 +24,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,6 +39,7 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
     private GoogleMap mMap;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private BackPressCloseHandler back;
+    private UiSettings mUiSettings;
     String usr = encodeUserEmail(mAuth.getCurrentUser().getEmail());
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference ref = database.getReference("app");
@@ -78,7 +80,7 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
             }
         });
 
-        Toast.makeText(this,usr_id,Toast.LENGTH_LONG).show();
+        //Toast.makeText(this,usr_id,Toast.LENGTH_LONG).show();
 
 
         tView5 = (TextView) findViewById(R.id.tView5);
@@ -111,29 +113,30 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mAuth.signOut();
+        if (Build.VERSION.SDK_INT >= 21)
+            finishAndRemoveTask();
+        else
+            finish();
+        System.exit(0);
+    }
+
     public void getLocation3(){
         LatLng current = new LatLng(Float.parseFloat(locs[0]),Float.parseFloat(locs[1]));
         mMap.addMarker(new MarkerOptions().position(current));
         mMap.setMinZoomPreference(10);
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
 
     }
 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        //mMap.setMyLocationEnabled(true);
-
-        // Add a marker in Sydney and move the camera
-        //LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
-        //----------read current location------------
-        //MarkerOptions mOptions = new MarkerOptions();
-        //mOptions.position(new LatLng(Integer.parseInt(locs[0]),Integer.parseInt(locs[1])));
-        //googleMap.addMarker(mOptions);
-        //LatLng current = new LatLng(Float.parseFloat(locs[0]),Float.parseFloat(locs[1]));
-        //
-        // mMap.addMarker(new MarkerOptions().position(current));
+        mUiSettings = mMap.getUiSettings();
+        mUiSettings.setZoomControlsEnabled(true);
+        mUiSettings.setZoomGesturesEnabled(true);
     }
 //------handler------
     private final Handler mHandler = new Handler(){
@@ -142,12 +145,12 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
                 case MSG_1:
                     //func
                     getLocation();
-                    Toast.makeText(getApplicationContext(),"1",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"1",Toast.LENGTH_SHORT).show();
                     break;
                 case MSG_2:
                     getLocation2();
                     getLocation3();
-                    Toast.makeText(getApplicationContext(),"2",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"2",Toast.LENGTH_SHORT).show();
                     break;
             }
         }
@@ -186,7 +189,7 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String value  = dataSnapshot.getValue(String.class);
                 loc=value;
-                Toast.makeText(getApplicationContext(),loc,Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(),loc,Toast.LENGTH_LONG).show();
                 if(value!=null)
                     handler.sendEmptyMessage(2);
             }
@@ -204,10 +207,7 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
         LatLng current = new LatLng(Float.parseFloat(locs[0]),Float.parseFloat(locs[1]));
         mMap.addMarker(new MarkerOptions().position(current));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(current));
-
-
-
-        Toast.makeText(getApplicationContext(),"2"+loc,Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(),"2"+loc,Toast.LENGTH_LONG).show();
     }
 
     @Override public void onBackPressed() {

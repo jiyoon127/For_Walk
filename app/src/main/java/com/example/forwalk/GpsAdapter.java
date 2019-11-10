@@ -16,12 +16,12 @@ import java.util.List;
 
 public class GpsAdapter extends RecyclerView.Adapter<GpsAdapter.ViewHolder> {
 
-    Context context;
     static private List<GpsItem> mGpsTempArray;
 
     public GpsAdapter(List<GpsItem> GpsList){
         mGpsTempArray = GpsList;
     }
+
     OnItemClickListener listener;
     public static interface OnItemClickListener{
         public void onItemClick(ViewHolder holder, View view, int position);
@@ -73,7 +73,6 @@ public class GpsAdapter extends RecyclerView.Adapter<GpsAdapter.ViewHolder> {
                     int position = getAdapterPosition();
                     if(listener!=null){
                         listener.onItemClick(ViewHolder.this, itemView, position);
-                        //cv.setCardBackgroundColor(Color.YELLOW);
                     }
                 }
             });

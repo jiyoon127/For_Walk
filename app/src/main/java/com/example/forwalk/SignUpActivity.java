@@ -99,35 +99,7 @@ public class SignUpActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(rBtn3.isChecked()) {
-            SharedReference.setUserName(SignUpActivity.this, id, pw, 0);//when successed to sign up, set info on sharedReference
 
-            final DatabaseReference myRef = database.getReference("app").child(encodeUserEmail(id));
-            taken.child(encodeUserEmail(id)).setValue(true);
-
-            myRef.child("blu_id").setValue("null");
-            myRef.child("con_id").setValue("null");
-            myRef.child("relationship").setValue(eRelText.getText().toString());
-            myRef.child("emer").setValue(0);
-            myRef.child("gps").child("current").setValue("null");
-            for(int i=1;i<=5;i++) {
-                myRef.child("gps").child("history").child(Integer.toString(i)).child("loc").setValue("null");
-                myRef.child("gps").child("history").child(Integer.toString(i)).child("time").setValue("null");
-            }
-            myRef.child("name").setValue(eText6.getText().toString());
-            myRef.child("phone").setValue(eText7.getText().toString());
-            myRef.child("type").setValue("user");
-
-        }
-        else {
-            SharedReference.setUserName(SignUpActivity.this, id, pw, 1);
-            final DatabaseReference proRef = database.getReference("app").child(encodeUserEmail(id));
-
-            proRef.child("con_id").setValue(encodeUserEmail(eText5.getText().toString()));//user의 하위객체
-            proRef.child("name").setValue(eText6.getText().toString());
-            proRef.child("phone").setValue(eText7.getText().toString());
-            proRef.child("type").setValue("protector");
-        }
     }
 
     private void createAccount(final String email, String password) {
@@ -183,6 +155,34 @@ public class SignUpActivity extends AppCompatActivity implements
 
                                         }
                                     });
+                                if(rBtn3.isChecked()) {
+                                    SharedReference.setUserName(SignUpActivity.this, id, pw, 0);//when successed to sign up, set info on sharedReference
+
+                                    final DatabaseReference myRef = database.getReference("app").child(encodeUserEmail(id));
+                                    taken.child(encodeUserEmail(id)).setValue(true);
+
+                                    myRef.child("blu_id").setValue("null");
+                                    myRef.child("con_id").setValue("null");
+                                    myRef.child("relationship").setValue(eRelText.getText().toString());
+                                    myRef.child("gps").child("current").setValue("null");
+                                    for(int i=1;i<=5;i++) {
+                                        myRef.child("gps").child("history").child(Integer.toString(i)).child("loc").setValue("null");
+                                        myRef.child("gps").child("history").child(Integer.toString(i)).child("time").setValue("null");
+                                    }
+                                    myRef.child("name").setValue(eText6.getText().toString());
+                                    myRef.child("phone").setValue(eText7.getText().toString());
+                                    myRef.child("type").setValue("user");
+
+                                }
+                                else {
+                                    SharedReference.setUserName(SignUpActivity.this, id, pw, 1);
+                                    final DatabaseReference proRef = database.getReference("app").child(encodeUserEmail(id));
+
+                                    proRef.child("con_id").setValue(encodeUserEmail(eText5.getText().toString()));//user의 하위객체
+                                    proRef.child("name").setValue(eText6.getText().toString());
+                                    proRef.child("phone").setValue(eText7.getText().toString());
+                                    proRef.child("type").setValue("protector");
+                                }
 
                                 Intent intent = new Intent(getBaseContext(), ProtectorActivity.class);
                                 startActivity(intent);

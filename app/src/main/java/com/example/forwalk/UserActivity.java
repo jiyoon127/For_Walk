@@ -2,17 +2,14 @@ package com.example.forwalk;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import java.math.*;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,8 +22,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
-import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -68,9 +63,8 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
     final static String LOC_INFO = "location_information";
     final static String TAG = "MSP03";
     final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    static String id = "", con_id = "", cur_log="",cur_time="",traf="", receiverUserID="";
-    static ArrayQueue queue = new ArrayQueue(5);
-    static int num1=0, trf_size=0, min_j=0;
+    static String id = "", con_id = "", cur_log = "", cur_time = "", traf = "", receiverUserID = "";
+    static int num1 = 0, trf_size = 0, min_j = 0;
 
     private BackPressCloseHandler back;
     private final int MSG_1 = 1;
@@ -79,13 +73,13 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
     static Traffic[] trf = new Traffic[100];
     static double cur_lat, cur_lng;
     static double[] d = new double[100];
+    Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
+        context = this;
         setContentView(R.layout.activity_user);
-
         mFuncs = FirebaseFunctions.getInstance();
 
         mAuth = FirebaseAuth.getInstance();
@@ -105,7 +99,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
         tView15 = (TextView) findViewById(R.id.tView15);
         tView16 = (TextView) findViewById(R.id.tView16);
         btn_register = (Button) findViewById(R.id.btn_register);
-        btn_connect = (Button) findViewById(R.id.btn_con);
+        btn_connect = (Button) findViewById(R.id.btn_usr_del_login1);
         btn_usr_del_login1 = (Button) findViewById(R.id.btn_usr_del_login1);
         String usr = mAuth.getCurrentUser().getEmail();
 
@@ -130,7 +124,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
             }
         });
 
-        for(int i=1;i<=5;i++) {
+        for (int i = 1; i <= 5; i++) {
             myRef.child("history").child(Integer.toString(i)).child("loc").setValue("null");
             myRef.child("history").child(Integer.toString(i)).child("time").setValue("null");
         }
@@ -138,7 +132,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
         btn_usr_del_login1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-             SharedReference.clearUserName(UserActivity.this);
+                SharedReference.clearUserName(UserActivity.this);
             }
         });
 
@@ -146,31 +140,30 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
         TimerTask m_Task = new TimerTask() {
             Query last = myRef.child("history").orderByKey().limitToLast(1);
             String num = last.getRef().getKey();
+
             @Override
             public void run() {
                 Log.d(TAG, num);
-                if(cur_log.equals("") && cur_time.equals("")) {
+                HashMap<String, Object> locaitonChangeMap = new HashMap<>();
+                if (!cur_log.equals("")) {
                     if (num.equals("history")) { //zero nodes
-                        myRef.child("history").child("1").child("loc").setValue(cur_log);
-                        myRef.child("history").child("1").child("time").setValue(cur_time);
+                        locaitonChangeMap.put("1/loc", cur_log);
+                        locaitonChangeMap.put("1/time", cur_time);
+                        myRef.child("history").updateChildren(locaitonChangeMap);
                         num = "1";
                         num1 = Integer.parseInt(num) + 1;
                     } else {
-                        myRef.child("history").child(Integer.toString(num1)).child("loc").setValue(cur_log);
-                        myRef.child("history").child(Integer.toString(num1)).child("time").setValue(cur_time);
+                        locaitonChangeMap.put(num1+"/loc", cur_log);
+                        locaitonChangeMap.put(num1+"/time", cur_time);
+                        myRef.child("history").updateChildren(locaitonChangeMap);
                         num1++;
                     }
                 }
 
-                ///
-
-
             }
         };
-        m_Timer.schedule(m_Task,15000,5000);
+        m_Timer.schedule(m_Task, 15000, 5000);
 
-
-        ref.child("emer").setValue("0");
         ref.child("name").addValueEventListener(new ValueEventListener() {//read user's name
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -187,7 +180,6 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
         handler.sendEmptyMessage(1);
 
 
-
         btn_connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -198,8 +190,6 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
         btn_register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //RegisterDialog reg = new RegisterDialog(UserActivity.this);
-                //reg.callFunction();
 
                 if (bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
                     bt.disconnect();
@@ -210,78 +200,8 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
 
             }
         });
-
-        tView11.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//----------------------------------move to emergency situation func---------------------------------
-                Toast.makeText(getApplicationContext(), "hello", Toast.LENGTH_LONG).show();
-                HashMap<String, String> chatNotificationMap = new HashMap<>();
-                chatNotificationMap.put("from", FirebaseInstanceId.getInstance().getToken());
-                chatNotificationMap.put("type", "request");
-                while (true) {
-                    if(!receiverUserID.equals("") && !con_id.equals("")) {
-                        NotificationRef.child(con_id).push()
-                                .setValue(chatNotificationMap);
-                        break;
-                    }
-                }
-
-                /*trafficRef.addValueEventListener(new ValueEventListener() {
-                    int i=0;
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for(DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                            trf[i] = new Traffic();
-                            trf[i] = postSnapshot.getValue(Traffic.class);
-                            i++;
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });*/
-
-                trafficRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        trf_size=0;
-                        for(DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                            long light = postSnapshot.child("light").getValue(long.class);
-                            String loc = postSnapshot.child("loc").getValue(String.class);
-                            Log.d(TAG, trf_size+"번 light: "+light+", loc: "+loc);
-                            trf[trf_size] = new Traffic(light, loc);
-                            trf_size++;
-                        }
-                        for(int j=0;j<trf_size;j++){
-                            d[j] = Math.sqrt(Math.pow(cur_lat - trf[j].get_lat(),2) + Math.pow(cur_lng - trf[j].get_lng(),2));
-                            Log.d(TAG, j+"번 d = "+d[j]);
-                        }
-
-                        double min = d[0];
-                        for(int j=1;j<trf_size;j++){
-                            if(d[j] < min) {
-                                min = d[j];
-                                min_j = j;
-                            }else
-                                min_j=0;
-                        }
-
-                        Toast.makeText(getApplicationContext(),"cur_trf: "+ trf[min_j].get_light(),Toast.LENGTH_LONG).show();
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-                //bt.send(trf[j]);
-            }
-        });
-
 //----------------bluetooth--------------------
-        /*
+
         if(!bt.isBluetoothAvailable())
         {
             Toast.makeText(this,"블루투스를 사용할 수 없습니다. 어플을 종료합니다.",Toast.LENGTH_LONG).show();
@@ -289,7 +209,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
         bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
             @Override
             public void onDataReceived(byte[] data, String message) {//데이터 수신
-                Toast.makeText(UserActivity.this,message,Toast.LENGTH_SHORT).show();
+                //Toast.makeText(UserActivity.this,message,Toast.LENGTH_SHORT).show();
                 if(message.equals("12142")){
                     int permission = checkSelfPermission(Manifest.permission.CALL_PHONE);
                     if(permission==PackageManager.PERMISSION_DENIED){
@@ -315,26 +235,53 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
                         }
                     }
                     else{
-                        Intent intent = new Intent(Intent.ACTION_CALL,Uri.parse("tel:01051335482"));
+                        Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:01051335482"));
                         startActivity(intent);
                     }
-                    //change emer status
-                    ref.child("emer").setValue("1");
+
+                    HashMap<String, String> chatNotificationMap = new HashMap<>();
+                    chatNotificationMap.put("from", FirebaseInstanceId.getInstance().getToken());
+                    chatNotificationMap.put("type", "request");
+                    while (true) {
+                        if (!receiverUserID.equals("") && !con_id.equals("")) {
+                            NotificationRef.child(con_id).push()
+                                    .setValue(chatNotificationMap);
+                            break;
+                        }
+                    }
                 }
                 else if(message.equals("123")){
-                    trafficRef.child("tra_id1").chid("light").addValueEventListener(new ValueEventListener() {
+                    trafficRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                 long value = dataSnapshot.getValue(long.class);
-                                 while(true){
-                                    if(value!=-1){//체크하기!!
-                                        traf = Long.toString(value);
-                                        bt.send(traf,true);
-                                        break;
-                                    }
-                                 }
-                        }
+                            trf_size = 0;
+                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                long light = postSnapshot.child("light").getValue(long.class);
+                                String loc = postSnapshot.child("loc").getValue(String.class);
+                                Log.d(TAG, trf_size + "번 light: " + light + ", loc: " + loc);
+                                trf[trf_size] = new Traffic(light, loc);
+                                trf_size++;
+                            }
+                            for (int j = 0; j < trf_size; j++) {
+                                d[j] = Math.sqrt(Math.pow(cur_lat - trf[j].get_lat(), 2) + Math.pow(cur_lng - trf[j].get_lng(), 2));
+                                Log.d(TAG, j + "번 d = " + d[j]);
+                            }
 
+                            double min = d[0];
+                            for (int j = 1; j < trf_size; j++) {
+                                if (d[j] < min) {
+                                    min = d[j];
+                                    min_j = j;
+                                } else
+                                    min_j = 0;
+                            }
+                            if(trf[min_j].get_light()==0)
+                                Toast.makeText(getApplicationContext(), "빨간불이 인식되었습니다.",Toast.LENGTH_LONG).show();
+                            else
+                                Toast.makeText(getApplicationContext(), "초록불이 인식되었습니다.",Toast.LENGTH_LONG).show();
+                            bt.send(Long.toString(trf[min_j].get_light()),true);
+                            //Toast.makeText(getApplicationContext(), "cur_trf: " + trf[min_j].get_light(), Toast.LENGTH_LONG).show();
+                        }
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -347,31 +294,26 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
 
         bt.setBluetoothConnectionListener(new BluetoothSPP.BluetoothConnectionListener() {
             @Override
-            public void onDeviceConnected(String name, String address) {//연결됐을 때
+            public void onDeviceConnected(String name, String address) {//when connected
                 Toast.makeText(getApplicationContext(),"Connected to "+name+"\n"+address,Toast.LENGTH_SHORT).show();
                 tView11.setText("\""+name+"\"");
                 tView12.setText("연결상태: 연결됨");
                 btn_register.setText("연결해제");
+                ref.child("blu_id").setValue(name);
             }
 
             @Override
-            public void onDeviceDisconnected() {//연결 해제
+            public void onDeviceDisconnected() {//disconnect
                 Toast.makeText(getApplicationContext(),"Connection lost",Toast.LENGTH_SHORT).show();
                 tView12.setText("연결상태: 해제됨");
                 btn_register.setText("등록");
             }
 
             @Override
-            public void onDeviceConnectionFailed() {//연결 실패
-                Toast.makeText(getApplicationContext(),"연결에 살패하였습니다. 다시 시도해 주세요.",Toast.LENGTH_SHORT).show();
+            public void onDeviceConnectionFailed() {//fail to connect
+                Toast.makeText(getApplicationContext(),"연결에 실패하였습니다. 다시 시도해 주세요.",Toast.LENGTH_SHORT).show();
             }
         });
-
-        //tView11 cane info
-        //tView12 bluetooth connect status
-        //tView14 pro name
-        //tView15 rel with pro
-        //tView16 pro phone
 
     }
 
@@ -406,7 +348,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
             if(resultCode== Activity.RESULT_OK)
                 bt.connect(data);
         }else if(requestCode==BluetoothState.REQUEST_ENABLE_BT){
-            if(resultCode==Activity.RESULT_OK){
+            if(resultCode== Activity.RESULT_OK){
                 bt.setupService();
                 bt.startService(BluetoothState.DEVICE_OTHER);
                 setup();
@@ -414,21 +356,19 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
                 Toast.makeText(getApplicationContext(),"Bluetooth was not enabled",Toast.LENGTH_SHORT).show();
                 finish();
             }
-        }*/
+        }
+
 //-----------------------------------------------------
     }
 
-//-----------------------gps---------------------------
-protected void onResume() {
+    //-----------------------gps---------------------------
+    protected void onResume() {
         super.onResume();
+        Log.d("resume", "resume-working");
+        String usr = mAuth.getCurrentUser().getEmail();
 
-    String usr = mAuth.getCurrentUser().getEmail();
-
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    final DatabaseReference myRef = database.getReference("app").child(encodeUserEmail(usr)).child("gps");
-
-    //final Date date = new Date();
-    //final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        final DatabaseReference myRef = database.getReference("app").child(encodeUserEmail(usr)).child("gps");
 
 
         if (ContextCompat.checkSelfPermission(this,
@@ -499,10 +439,10 @@ protected void onResume() {
         String usr = mAuth.getCurrentUser().getEmail();
 
         Log.d(LOC_INFO, "latitiude:" + lat + ", longnitude: " + lng);
-        //Toast.makeText(this, "latitude: "+ lat +", longitude: "+ lng, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "latitude: " + lat + ", longitude: " + lng, Toast.LENGTH_SHORT).show();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference myRef = database.getReference("app").child(encodeUserEmail(usr)).child("gps");
-        cur_log = lat+","+lng;
+        cur_log = lat + "," + lng;
         cur_lat = Math.floor(lat*1000000)/1000000.0;
         cur_lng = Math.floor(lng*1000000)/1000000.0;
         myRef.child("current").setValue(cur_log);
@@ -523,19 +463,19 @@ protected void onResume() {
     }
 
 
- //------------Thread----------------------
+    //------------Thread----------------------
 
-    private final Handler mHandler = new Handler(){
-        public void handleMessage(Message msg){
-            switch(msg.what){
+    private final Handler mHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
                 case MSG_1:
                     //func
                     getUser();
-                    Toast.makeText(getApplicationContext(),"1",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), "1", Toast.LENGTH_SHORT).show();
                     break;
                 case MSG_2:
                     getProtector();
-                    Toast.makeText(getApplicationContext(),"2",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), "2", Toast.LENGTH_SHORT).show();
                     break;
             }
         }
@@ -543,18 +483,18 @@ protected void onResume() {
 
     Handler handler = mHandler;
 
-    public void run(){
-        while(true){
+    public void run() {
+        while (true) {
             Message message = mHandler.obtainMessage();
 
-            message.what=MSG_1;
-            message.arg1=MSG_2;
+            message.what = MSG_1;
+            message.arg1 = MSG_2;
 
             handler.sendMessage(message);
         }
     }
 
-    public void getUser(){
+    public void getUser() {
 
         DatabaseReference ref = database.getReference("app").child(id);
 
@@ -562,16 +502,16 @@ protected void onResume() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String value = dataSnapshot.getValue(String.class);
-                if(value!=null) {
-                    if(value.equals("null")){
+                if (value != null) {
+                    if (value.equals("null")) {
                         tView14.setVisibility(View.INVISIBLE);
                         tView15.setVisibility(View.INVISIBLE);
                         tView16.setText(R.string.pro_info);
-                    }else {
+                    } else {
                         tView14.setVisibility(View.VISIBLE);
                         tView15.setVisibility(View.VISIBLE);
                         con_id = value;
-                        Toast.makeText(getApplicationContext(), value, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), value, Toast.LENGTH_SHORT).show();
                         handler.sendEmptyMessage(2);
                     }
                 }
@@ -584,7 +524,7 @@ protected void onResume() {
         });
     }
 
-    public void getProtector(){
+    public void getProtector() {
 
         DatabaseReference ref = database.getReference("app").child(con_id);
 
@@ -592,12 +532,12 @@ protected void onResume() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String value = dataSnapshot.getValue(String.class);
-                tView14.setText(value+"님");
+                tView14.setText(value + "님");
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d(TAG,"fail to read protector's name");
+                Log.d(TAG, "fail to read protector's name");
             }
         });
 
@@ -605,12 +545,12 @@ protected void onResume() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String value = dataSnapshot.getValue(String.class);
-                tView16.setText("전화번호: "+value);
+                tView16.setText("전화번호: " + value);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d(TAG,"fail to read protector's phone number");
+                Log.d(TAG, "fail to read protector's phone number");
             }
         });
 
@@ -618,7 +558,7 @@ protected void onResume() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String value = dataSnapshot.getValue(String.class);
-                tView15.setText("관계: "+value);
+                tView15.setText("관계: " + value);
             }
 
             @Override
@@ -628,23 +568,27 @@ protected void onResume() {
         });
     }
 
-    @Override public void onBackPressed() {
+    @Override
+    public void onBackPressed() {
         //super.onBackPressed();
         bt.stopService();//블루투스 중지
         back.onBackPressed();
         lm.removeUpdates(this);
-        lm=null;
-        LocationListener lmListen =null;
         mAuth.signOut();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mAuth.signOut();
+        if (Build.VERSION.SDK_INT >= 21)
+            finishAndRemoveTask();
+        else
+            finish();
+        System.exit(0);
     }
 
     static String encodeUserEmail(String userEmail) {
         return userEmail.replace(".", ",");
     }
 }
-

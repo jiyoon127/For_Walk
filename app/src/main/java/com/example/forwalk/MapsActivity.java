@@ -58,6 +58,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     static Marker[] markers = new Marker[5];
     static ArrayList<LatLng> arrayPoints = new ArrayList<LatLng>();
     static String con_id="";
+    static Query last5;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,20 +69,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.maps);
         mapFragment.getMapAsync(this);
 
-        init();
-
-        Query last5 = ref.child(con_id).child("gps").child("history").limitToLast(5);
+        last5 = ref.child(con_id).child("gps").child("history").limitToLast(5);
         last5.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int i=0;
                 for(DataSnapshot postSnapshot: dataSnapshot.getChildren()){
                     locs[i] = postSnapshot.child("loc").getValue().toString();
+                    times[i] = postSnapshot.child("time").getValue().toString();
                     Log.d("loc", "loc " + i + " = " + locs[i]);
-                        times[i] = postSnapshot.child("time").getValue().toString();
-                        if (times[i].equals("null"))
-                            times[i] = "위치정보가 존재하지 않습니다";
-                        i++;
+                    if (times[i].equals("null"))
+                        times[i] = "위치정보가 존재하지 않습니다";
+                    i++;
                 }
                 handler.sendEmptyMessage(1);
             }
@@ -91,6 +90,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+
+        init();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     private void init(){
@@ -98,6 +104,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void dataInit(){
+
         mGpsArray = new ArrayList<GpsItem>();
 
         for(int i=0;i<5;i++){
@@ -121,9 +128,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 GpsItem item = GpsAdapter.getItem(position);
                 CardView cv = (CardView) findViewById(R.id.cardView);
                 cv.setCardBackgroundColor(Color.WHITE);
-                Toast.makeText(getApplicationContext(),String.valueOf(position+1),Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(),String.valueOf(position+1),Toast.LENGTH_LONG).show();
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(current[position]));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(25));
                 markers[position].showInfoWindow();
             }
         });
@@ -142,7 +149,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.clear();
         PolylineOptions polyline1 = new PolylineOptions();
         polyline1.color(Color.RED);
-
+        arrayPoints.clear();
         for(int i=0;i<5;i++) {
             if(!locs[i].equals("null")){
                 loc = locs[i].split(",");
@@ -151,7 +158,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 markers[i].showInfoWindow();
                 Log.d("current", "current["+i+"]: "+current[i]);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(current[i]));
-                mMap.setMinZoomPreference(7);
+                mMap.setMinZoomPreference(10);
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
                 if(!current[i].equals("null"))
                 {
                     arrayPoints.add(current[i]);
@@ -171,13 +179,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 case MSG_1:
                     //func
                     dataInit();
-                    Toast.makeText(getApplicationContext(),"1",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"1",Toast.LENGTH_SHORT).show();
                     handler.sendEmptyMessage(2);
                     break;
                 case MSG_2:
                     //func
                     getLocations();
-                    Toast.makeText(getApplicationContext(),"2",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"2",Toast.LENGTH_SHORT).show();
                     break;
             }
         }
@@ -195,8 +203,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             handler.sendMessage(message);
         }
     }
-
-
 
     static String encodeUserEmail(String userEmail) {
         return userEmail.replace(".", ",");

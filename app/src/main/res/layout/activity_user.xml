@@ -47,12 +47,11 @@
         app:layout_constraintTop_toBottomOf="@+id/tView10" />
 
     <Button
-        android:id="@+id/btn_con"
+        android:id="@+id/btn_usr_del_login1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="70dp"
-        android:layout_marginRight="70dp"
-        android:text="지팡이 연결"
+        android:text="@string/del_auto_login"
         app:layout_constraintBaseline_toBaselineOf="@+id/btn_register"
         app:layout_constraintEnd_toStartOf="@+id/btn_register"
         app:layout_constraintHorizontal_bias="1.0"
@@ -80,7 +79,7 @@
         android:textSize="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_con" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_usr_del_login1" />
 
     <TextView
         android:id="@+id/tView14"
@@ -101,9 +100,8 @@
         android:id="@+id/tView15"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="40dp"
         android:layout_marginEnd="92dp"
-        android:layout_marginRight="92dp"
         android:text="관계: 가족"
         android:textSize="24dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -122,15 +120,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tView14"
         app:layout_constraintVertical_bias="0.005" />
-
-    <Button
-        android:id="@+id/btn_usr_del_login1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="@string/del_auto_login"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tView16" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
