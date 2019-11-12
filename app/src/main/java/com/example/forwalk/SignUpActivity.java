@@ -14,7 +14,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
@@ -214,7 +213,7 @@ public class SignUpActivity extends AppCompatActivity implements
             if(id.isEmpty()==false && pw.isEmpty()==false)
                 createAccount(id, pw);
             else
-                Toast.makeText(SignUpActivity.this, "아이디 또는 패스워드를 입력해주세요", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SignUpActivity.this, R.string.req_id_pw, Toast.LENGTH_SHORT).show();
         }
     }
 }

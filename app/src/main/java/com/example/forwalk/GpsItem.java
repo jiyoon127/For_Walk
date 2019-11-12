@@ -1,7 +1,5 @@
 package com.example.forwalk;
 
-import androidx.annotation.NonNull;
-
 public class GpsItem {
 
     private int num;

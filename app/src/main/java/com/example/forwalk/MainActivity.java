@@ -3,12 +3,11 @@ package com.example.forwalk;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.renderscript.Sampler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -83,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Log.d(TAG,"cannot read type val");
                         //Toast.makeText(getApplicationContext(),"cannot read type val",Toast.LENGTH_LONG).show();
                     }
                 });
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     String deviceToken = FirebaseInstanceId.getInstance().getToken();
                                     usrRef.child("device_token").setValue(deviceToken);
                             } else {//failed to log in
-                                Toast.makeText(getApplicationContext(), "로그인에 실패하였습니다. 다시 시도해주세요.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), R.string.login_failed, Toast.LENGTH_LONG).show();
                             }
                         }
                     });
@@ -107,33 +107,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
                 finish();
                 break;
-        }
-    }
-
-    private final Handler mHandler = new Handler(){
-        public void handleMessage(Message msg){
-            switch(msg.what){
-                case MSG_1:
-                    //func
-                    //Toast.makeText(getApplicationContext(),"1",Toast.LENGTH_SHORT).show();
-                    break;
-                case MSG_2:
-                    //Toast.makeText(getApplicationContext(),"2",Toast.LENGTH_SHORT).show();
-                    break;
-            }
-        }
-    };
-
-    Handler handler = mHandler;
-
-    public void run(){
-        while(true){
-            Message message = mHandler.obtainMessage();
-
-            message.what=MSG_1;
-            message.arg1=MSG_2;
-
-            handler.sendMessage(message);
         }
     }
 

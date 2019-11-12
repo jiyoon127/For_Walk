@@ -16,7 +16,7 @@
     <string name="welcome">"Welcome !"</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
+    <string name="login_failed">"로그인에 실패하였습니다. 다시 시도해주세요."</string>
     <string name="map">현재 위치</string>
     <string name="sign_up_complete">회원 가입</string>
     <string name="sign_up_success">회원 가입이 완료되었습니다</string>
@@ -27,4 +27,5 @@
     <string name="pro_info">보호자 정보가 없습니다</string>
     <string name="rel">관계</string>
     <string name="del_auto_login">자동로그인 해제</string>
+    <string name="req_id_pw">아이디 또는 패수워드를 입력해주세요.</string>
 </resources>

@@ -171,19 +171,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         polyline1.addAll(arrayPoints);
         mMap.addPolyline(polyline1);
     }
-//---------------------handler-------------------------
 
+//---------------------handler-------------------------
     private final Handler mHandler = new Handler(){
         public void handleMessage(Message msg){
             switch(msg.what){
                 case MSG_1:
-                    //func
                     dataInit();
                     //Toast.makeText(getApplicationContext(),"1",Toast.LENGTH_SHORT).show();
                     handler.sendEmptyMessage(2);
                     break;
                 case MSG_2:
-                    //func
                     getLocations();
                     //Toast.makeText(getApplicationContext(),"2",Toast.LENGTH_SHORT).show();
                     break;
@@ -203,9 +201,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             handler.sendMessage(message);
         }
     }
-
-    static String encodeUserEmail(String userEmail) {
-        return userEmail.replace(".", ",");
-    }
-
 }

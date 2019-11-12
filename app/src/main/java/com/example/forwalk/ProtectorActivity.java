@@ -58,7 +58,6 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_protector);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -79,9 +78,7 @@ public class ProtectorActivity extends FragmentActivity implements OnMapReadyCal
 
             }
         });
-
         //Toast.makeText(this,usr_id,Toast.LENGTH_LONG).show();
-
 
         tView5 = (TextView) findViewById(R.id.tView5);
         btn_map = (Button) findViewById(R.id.btn_map);

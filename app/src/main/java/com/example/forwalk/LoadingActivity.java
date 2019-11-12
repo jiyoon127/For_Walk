@@ -31,7 +31,6 @@ public class LoadingActivity extends Activity {
         email = SharedReference.getUserName(LoadingActivity.this);
         pw = SharedReference.getUserPw(LoadingActivity.this);
         type = SharedReference.getUserType(LoadingActivity.this);
-        //SharedReference.clearUserName(LoadingActivity.this);
 
         if (SharedReference.getUserName(LoadingActivity.this).length() == 0) {
             startLoading(MainActivity.class);
@@ -48,7 +47,7 @@ public class LoadingActivity extends Activity {
                                     startLoading(ProtectorActivity.class);//if it is protector open ProtectorActivity
                                 }
                             } else {//failed to log in
-                                Toast.makeText(getApplicationContext(), "로그인에 실패하였습니다. 다시 시도해주세요.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), R.string.login_failed, Toast.LENGTH_LONG).show();
                                 startLoading(MainActivity.class);//open mainActivity
                             }
                         }

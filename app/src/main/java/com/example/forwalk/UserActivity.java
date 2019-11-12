@@ -63,7 +63,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
     final static String LOC_INFO = "location_information";
     final static String TAG = "MSP03";
     final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    static String id = "", con_id = "", cur_log = "", cur_time = "", traf = "", receiverUserID = "";
+    static String id = "", con_id = "", cur_log = "", cur_time = "", receiverUserID = "";
     static int num1 = 0, trf_size = 0, min_j = 0;
 
     private BackPressCloseHandler back;
@@ -94,7 +94,6 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
         tView10 = (TextView) findViewById(R.id.tView10);
         tView11 = (TextView) findViewById(R.id.tView11);
         tView12 = (TextView) findViewById(R.id.tView12);
-        //tView13 = (TextView) findViewById(R.id.tView13);
         tView14 = (TextView) findViewById(R.id.tView14);
         tView15 = (TextView) findViewById(R.id.tView15);
         tView16 = (TextView) findViewById(R.id.tView16);
@@ -200,7 +199,8 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
 
             }
         });
-//----------------bluetooth--------------------
+
+//----------------bluetooth--------------------//애뮬레이터에서 실행할 경우 블루투스 기능을 제공하지 않기때문에 블루투스 기능을 주석처리하거나 실제 기기로 테스트 해야함
 
         if(!bt.isBluetoothAvailable())
         {
@@ -358,7 +358,7 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
             }
         }
 
-//-----------------------------------------------------
+//-------------------------bluetooth-end----------------------------
     }
 
     //-----------------------gps---------------------------
@@ -425,7 +425,6 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
     @Override
     protected void onPause() {
         super.onPause();
-        //lm.removeUpdates(this);
     }
 
     // LocationListener 구현을 위한 메소드
@@ -570,7 +569,6 @@ public class UserActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onBackPressed() {
-        //super.onBackPressed();
         bt.stopService();//블루투스 중지
         back.onBackPressed();
         lm.removeUpdates(this);
